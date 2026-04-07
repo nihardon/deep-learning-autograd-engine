@@ -43,14 +43,16 @@ std::shared_ptr<Variable> add(std::shared_ptr<Variable> a, std::shared_ptr<Varia
     ops::add(a->data, b->data, result_data);
     // Build graph
     auto out = std::make_shared<Variable>(std::move(result_data));
+    std::weak_ptr<Variable> weak_out = out;
     out->children = {a, b};
 
     // Define backward pass
-    out->backward_fn = [out, a, b]() {
-        ops::add(a->grad, out->grad, a->grad);
-        ops::add(b->grad, out->grad, b->grad);
-    };
-
+    out->backward_fn = [weak_out, a, b]() {
+    if (auto locked_out = weak_out.lock()) {
+        ops::add(a->grad, locked_out->grad, a->grad);
+        ops::add(b->grad, locked_out->grad, b->grad);
+    }
+};
     return out;
 }
 
