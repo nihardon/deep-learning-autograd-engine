@@ -1,5 +1,6 @@
 #include "ops.h"
 #include <stdexcept>
+#include <cmath>
 
 // Detect 
 #if defined(__aarch64__) || defined(__ARM_NEON)
